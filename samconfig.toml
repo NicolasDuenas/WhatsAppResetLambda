@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.global.parameters]
+stack_name = "whatsapp-reset-lambda"
+region = "us-east-1"
+confirm_changeset = false
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = ""

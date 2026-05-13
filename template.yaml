@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: WhatsAppResetLambda — resets monthly WhatsApp quota for Pro-plan doctors in VitalityHub
+
+Parameters:
+  MongoDbConnectionString:
+    Type: String
+    NoEcho: true
+    Description: MongoDB Atlas connection string
+
+  MongoDbDatabaseName:
+    Type: String
+    Default: VitalityHub
+
+Globals:
+  Function:
+    Runtime: dotnet8
+    Architectures:
+      - x86_64
+    CodeUri: src/WhatsAppResetLambda/
+
+Resources:
+  WhatsAppResetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: WhatsAppResetLambda
+      Handler: WhatsAppResetLambda::WhatsAppResetLambda.ResetFunction::FunctionHandler
+      MemorySize: 256
+      Timeout: 60
+      Environment:
+        Variables:
+          MONGODB_CONNECTION_STRING: !Ref MongoDbConnectionString
+          MONGODB_DATABASE_NAME: !Ref MongoDbDatabaseName
+      Events:
+        FirstOfMonth:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 0 1 * ? *)
+            Name: WhatsAppResetSchedule
+            Description: Resets WhatsApp message quota for all Pro-plan doctors on the 1st of each month
+            Enabled: true
+
+Outputs:
+  WhatsAppResetFunctionArn:
+    Description: WhatsApp Reset Lambda function ARN
+    Value: !GetAtt WhatsAppResetFunction.Arn
